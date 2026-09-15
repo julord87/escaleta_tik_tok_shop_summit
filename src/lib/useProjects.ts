@@ -50,5 +50,10 @@ export function useProjects() {
     return { id: data as string | null, error: error?.message ?? null }
   }
 
-  return { projects, loading, reload, createProject }
+  async function deleteProject(projectId: string) {
+    await supabase.from('projects').delete().eq('id', projectId)
+    await reload()
+  }
+
+  return { projects, loading, reload, createProject, deleteProject }
 }

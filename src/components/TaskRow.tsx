@@ -32,8 +32,13 @@ export function TaskRow({ task, canCheck, assigneeName, onToggle }: Props) {
         <span className={`text-[13px] leading-snug ${task.checked ? 'text-text-faint line-through' : isQuiet ? 'text-text-dim' : 'text-text'}`}>
           {task.what}
         </span>
-        <span className="font-mono text-[10px] tracking-wide text-text-faint">
-          {[task.meta, assigneeName].filter(Boolean).join(' · ')}
+        <span className="flex flex-wrap items-center gap-x-2 font-mono text-[10px] tracking-wide text-text-faint">
+          {task.meta && <span>{task.meta}</span>}
+          {(assigneeName || task.who) && (
+            <span className="text-text-dim">
+              <span className="text-text-faint">resp.</span> {assigneeName || task.who}
+            </span>
+          )}
         </span>
         {task.note && (
           <span className="mt-0.5 rounded-r bg-surface-2 border-l-2 border-border-strong px-2 py-0.5 text-[11.5px] italic text-text-dim">

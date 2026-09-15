@@ -48,6 +48,7 @@ export interface DbTask {
   time_label: string | null
   what: string
   meta: string | null
+  who: string | null
   variant: TaskVariant
   assigned_to: string | null
   sort_order: number

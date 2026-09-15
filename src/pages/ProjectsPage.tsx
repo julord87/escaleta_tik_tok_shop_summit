@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
 import { useProjects } from '../lib/useProjects'
+import { DeleteButton } from '../components/DeleteButton'
 
 export function ProjectsPage() {
   const { profile, signOut } = useAuth()
-  const { projects, loading, createProject } = useProjects()
+  const { projects, loading, createProject, deleteProject } = useProjects()
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [event, setEvent] = useState('')
@@ -75,9 +76,18 @@ export function ProjectsPage() {
               <div className="text-[14px] font-semibold text-text">{project.name}</div>
               <div className="font-mono text-[11px] text-text-faint">{project.event || project.venue}</div>
             </div>
-            <span className={`rounded-full px-2.5 py-1 font-mono text-[10px] uppercase ${role === 'admin' ? 'bg-text text-white' : 'border-[2.5px] border-border-strong text-text-dim'}`}>
-              {role}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`rounded-full px-2.5 py-1 font-mono text-[10px] uppercase ${role === 'admin' ? 'bg-text text-white' : 'border-[2.5px] border-border-strong text-text-dim'}`}>
+                {role}
+              </span>
+              {role === 'admin' && (
+                <DeleteButton
+                  itemLabel={project.name}
+                  confirmText="Eliminar proyecto (borra dias, tareas, pendientes, crew y contactos)"
+                  onConfirm={() => deleteProject(project.id)}
+                />
+              )}
+            </div>
           </Link>
         ))}
       </div>

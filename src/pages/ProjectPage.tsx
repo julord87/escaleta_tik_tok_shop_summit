@@ -391,30 +391,32 @@ function AddLaneForm({ onSubmit }: { onSubmit: (v: { room: string; floor: string
 
 function AddTaskForm({ members, onSubmit }: {
   members: { user_id: string; profile?: { full_name: string | null; email: string | null } }[]
-  onSubmit: (v: { time_label: string; what: string; meta: string; variant: TaskVariant; assigned_to: string | null }) => void
+  onSubmit: (v: { time_label: string; what: string; meta: string; who: string; variant: TaskVariant; assigned_to: string | null }) => void
 }) {
   const [show, setShow] = useState(false)
   const [time_label, setTime] = useState('')
   const [what, setWhat] = useState('')
   const [meta, setMeta] = useState('')
+  const [who, setWho] = useState('')
   const [variant, setVariant] = useState<TaskVariant>('normal')
   const [assigned_to, setAssigned] = useState('')
   if (!show) return <button onClick={() => setShow(true)} className="mt-2 self-start font-mono text-[11px] text-text-dim underline">+ tarea</button>
   return (
     <form
-      onSubmit={(e) => { e.preventDefault(); onSubmit({ time_label, what, meta, variant, assigned_to: assigned_to || null }); setShow(false); setTime(''); setWhat(''); setMeta(''); setVariant('normal'); setAssigned('') }}
+      onSubmit={(e) => { e.preventDefault(); onSubmit({ time_label, what, meta, who, variant, assigned_to: assigned_to || null }); setShow(false); setTime(''); setWhat(''); setMeta(''); setWho(''); setVariant('normal'); setAssigned('') }}
       className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2"
     >
       <input required placeholder="Hora" value={time_label} onChange={(e) => setTime(e.target.value)} className="w-20 rounded-lg border border-border px-2 py-1.5 text-[12px]" />
       <input required placeholder="Tarea" value={what} onChange={(e) => setWhat(e.target.value)} className="min-w-[180px] flex-1 rounded-lg border border-border px-2 py-1.5 text-[12px]" />
-      <input placeholder="Proveedor / meta" value={meta} onChange={(e) => setMeta(e.target.value)} className="rounded-lg border border-border px-2 py-1.5 text-[12px]" />
+      <input placeholder="Proveedor" value={meta} onChange={(e) => setMeta(e.target.value)} className="rounded-lg border border-border px-2 py-1.5 text-[12px]" />
+      <input placeholder="Responsable (si no es de Smartworks)" value={who} onChange={(e) => setWho(e.target.value)} className="rounded-lg border border-border px-2 py-1.5 text-[12px]" />
       <select value={variant} onChange={(e) => setVariant(e.target.value as TaskVariant)} className="rounded-lg border border-border px-2 py-1.5 font-mono text-[11px]">
         <option value="normal">normal</option>
         <option value="accent">accent</option>
         <option value="quiet">quiet</option>
       </select>
       <select value={assigned_to} onChange={(e) => setAssigned(e.target.value)} className="rounded-lg border border-border px-2 py-1.5 font-mono text-[11px]">
-        <option value="">sin asignar</option>
+        <option value="">sin asignar (Smartworks)</option>
         {members.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email}</option>)}
       </select>
       <button type="submit" className="rounded-lg bg-text px-3 py-1.5 font-mono text-[11px] text-white">Agregar</button>

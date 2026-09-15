@@ -141,12 +141,12 @@ export function useProjectData(projectId: string | undefined) {
   }
   async function addTask(
     laneId: string,
-    input: { time_label: string; what: string; meta: string; variant: TaskVariant; assigned_to: string | null },
+    input: { time_label: string; what: string; meta: string; who: string; variant: TaskVariant; assigned_to: string | null },
   ) {
     await supabase.from('tasks').insert({ lane_id: laneId, ...input })
     await reload()
   }
-  async function updateTask(id: string, input: Partial<Pick<DbTask, 'time_label' | 'what' | 'meta' | 'variant' | 'assigned_to'>>) {
+  async function updateTask(id: string, input: Partial<Pick<DbTask, 'time_label' | 'what' | 'meta' | 'who' | 'variant' | 'assigned_to'>>) {
     await supabase.from('tasks').update(input).eq('id', id)
     await reload()
   }
