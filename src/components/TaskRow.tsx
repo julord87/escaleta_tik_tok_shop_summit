@@ -33,8 +33,7 @@ export function TaskRow({ task, canCheck, assigneeName, onToggle }: Props) {
           {task.what}
         </span>
         <span className="font-mono text-[10px] tracking-wide text-text-faint">
-          {task.meta}
-          {assigneeName ? ` · ${assigneeName}` : ''}
+          {[task.meta, assigneeName].filter(Boolean).join(' · ')}
         </span>
         {task.note && (
           <span className="mt-0.5 rounded-r bg-surface-2 border-l-2 border-border-strong px-2 py-0.5 text-[11.5px] italic text-text-dim">

@@ -210,7 +210,9 @@ export function ProjectPage() {
               />
               <span className={`text-[13px] leading-relaxed ${item.checked ? 'text-text-faint line-through' : 'text-text-dim'}`}>
                 {item.label}
-                <span className="ml-1.5 font-mono text-[10.5px] text-text-faint">{item.who}{profileById(item.assigned_to) ? ` · ${profileLabel(profileById(item.assigned_to))}` : ''}</span>
+                <span className="ml-1.5 font-mono text-[10.5px] text-text-faint">
+                  {[item.who, profileLabel(profileById(item.assigned_to))].filter(Boolean).join(' · ')}
+                </span>
               </span>
               {isAdmin && (
                 <DeleteButton itemLabel={item.label} onConfirm={() => deleteOpenItem(item.id)} className="ml-auto" />
