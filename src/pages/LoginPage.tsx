@@ -15,13 +15,17 @@ export function LoginPage() {
     e.preventDefault()
     setError(null)
     setInfo(null)
+    if (mode === 'signup' && !/@smartworks\.es$/i.test(email.trim())) {
+      setError('Solo se permiten cuentas con email @smartworks.es')
+      return
+    }
     setBusy(true)
     if (mode === 'login') {
       const { error } = await signIn(email, password)
       if (error) setError(error)
     } else {
       const { error } = await signUp(email, password, fullName)
-      if (error) setError(error)
+      if (error) setError(error.includes('smartworks.es') || error.includes('Database error') ? 'Solo se permiten cuentas con email @smartworks.es' : error)
       else setInfo('Cuenta creada. Ya podes iniciar sesion.')
     }
     setBusy(false)

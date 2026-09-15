@@ -32,3 +32,7 @@ body {
   background: var(--color-text);
   color: #fff;
 }
+
+button:not(:disabled) {
+  cursor: pointer;
+}
