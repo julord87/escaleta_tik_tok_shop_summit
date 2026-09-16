@@ -452,12 +452,12 @@ function EditTaskButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(event) => { event.preventDefault(); event.stopPropagation(); onClick() }}
       aria-label="Editar tarea"
       title="Editar tarea"
-      className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border text-text-dim transition-colors duration-150 hover:border-border-strong hover:bg-surface-2 hover:text-text focus:outline-none focus:ring-2 focus:ring-text focus:ring-offset-2 active:scale-95"
+      className="inline-flex shrink-0 items-center justify-center rounded-md p-1 text-text-faint transition-colors duration-150 hover:bg-surface-2 hover:text-text focus:outline-none focus:ring-2 focus:ring-text focus:ring-offset-2 active:scale-95"
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.8]">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M12 20h9" />
         <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" />
       </svg>
@@ -471,7 +471,11 @@ function EditTaskModal({ task, members, onCancel, onSubmit }: {
   onCancel: () => void
   onSubmit: (v: Pick<DbTask, 'time_label' | 'what' | 'meta' | 'who' | 'note' | 'variant' | 'assigned_to'>) => Promise<void>
 }) {
-  const [time_label, setTime] = useState(task.time_label ?? '')
+  const initialTiming = readTiming(task.time_label)
+  const [timeMode, setTimeMode] = useState<'fixed' | 'range' | 'flexible'>(initialTiming.mode)
+  const [startTime, setStartTime] = useState(initialTiming.start)
+  const [endTime, setEndTime] = useState(initialTiming.end)
+  const [flexibleTime, setFlexibleTime] = useState(initialTiming.flexible)
   const [what, setWhat] = useState(task.what)
   const [meta, setMeta] = useState(task.meta ?? '')
   const [who, setWho] = useState(task.who ?? '')
@@ -484,6 +488,7 @@ function EditTaskModal({ task, members, onCancel, onSubmit }: {
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     setSaving(true)
+    const time_label = timeMode === 'range' ? `${startTime}–${endTime}` : timeMode === 'fixed' ? startTime : flexibleTime
     await onSubmit({ time_label, what, meta, who, note, variant, assigned_to: assigned_to || null })
   }
 
@@ -498,7 +503,16 @@ function EditTaskModal({ task, members, onCancel, onSubmit }: {
           <button type="button" onClick={onCancel} className="h-9 px-2 font-mono text-[11px] text-text-dim underline">Cancelar</button>
         </div>
         <div className="grid gap-3 sm:grid-cols-[110px_1fr]">
-          <Field label="Hora"><input required value={time_label} onChange={(e) => setTime(e.target.value)} className={fieldClass} /></Field>
+          <Field label="Horario">
+            <select value={timeMode} onChange={(e) => setTimeMode(e.target.value as 'fixed' | 'range' | 'flexible')} className={fieldClass}>
+              <option value="fixed">Hora fija</option>
+              <option value="range">Inicio y fin</option>
+              <option value="flexible">Franja libre</option>
+            </select>
+          </Field>
+          {timeMode === 'fixed' && <Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field>}
+          {timeMode === 'range' && <><Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field><Field label="Fin"><input required type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={fieldClass} /></Field></>}
+          {timeMode === 'flexible' && <Field label="Franja"><input required placeholder="Ej. Durante montaje" value={flexibleTime} onChange={(e) => setFlexibleTime(e.target.value)} className={fieldClass} /></Field>}
           <Field label="Tarea"><input required value={what} onChange={(e) => setWhat(e.target.value)} className={fieldClass} /></Field>
           <Field label="Proveedor"><input value={meta} onChange={(e) => setMeta(e.target.value)} className={fieldClass} /></Field>
           <Field label="Responsable"><input value={who} onChange={(e) => setWho(e.target.value)} className={fieldClass} /></Field>
@@ -517,6 +531,19 @@ function EditTaskModal({ task, members, onCancel, onSubmit }: {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="flex flex-col gap-1.5"><span className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-text-faint">{label}</span>{children}</label>
+}
+
+function readTiming(value: string | null) {
+  const raw = value?.trim() ?? ''
+  const range = raw.match(/^(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})$/)
+  if (range) return { mode: 'range' as const, start: normalizeTime(range[1]), end: normalizeTime(range[2]), flexible: '' }
+  if (/^\d{1,2}:\d{2}$/.test(raw)) return { mode: 'fixed' as const, start: normalizeTime(raw), end: '', flexible: '' }
+  return { mode: 'flexible' as const, start: '', end: '', flexible: raw }
+}
+
+function normalizeTime(value: string) {
+  const [hour, minute] = value.split(':')
+  return `${hour.padStart(2, '0')}:${minute}`
 }
 
 function AddOpenItemForm({ members, onSubmit }: {
