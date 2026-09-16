@@ -3,20 +3,19 @@ import type { DbTask, Profile } from '../types/db'
 interface Props {
   task: DbTask
   showTime?: boolean
+  contained?: boolean
   canCheck: boolean
   assigneeName: string | null
   onToggle: (task: DbTask, next: boolean) => void
 }
 
-export function TaskRow({ task, showTime = true, canCheck, assigneeName, onToggle }: Props) {
+export function TaskRow({ task, showTime = true, contained = false, canCheck, assigneeName, onToggle }: Props) {
   const isAccent = task.variant === 'accent'
   const isQuiet = task.variant === 'quiet'
 
   return (
     <label
-      className={`flex items-start gap-3 border-b border-border py-2.5 last:border-b-0 ${
-        isAccent ? 'border-l-[3px] border-l-text pl-3' : ''
-      } ${canCheck ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
+      className={`flex items-start gap-3 ${contained ? '' : 'border-b border-border py-2.5 last:border-b-0'} ${canCheck ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
       title={canCheck ? undefined : 'Solo el responsable asignado o un admin puede marcar esta tarea'}
     >
       <input

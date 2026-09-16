@@ -167,11 +167,16 @@ export function ProjectPage() {
 
             {isAdmin && <div className="mt-3"><button type="button" onClick={() => setShowStructure((value) => !value)} className="font-mono text-[10.5px] text-text-faint underline">{showStructure ? 'Volver a orden cronológico' : 'Editar estructura por sala'}</button></div>}
 
-            {!showStructure && <div className="mt-4 divide-y divide-border border-t-2 border-text">
-              {orderedTasks.map(({ lane, task }) => <div key={task.id} className={`grid gap-2 py-3 sm:grid-cols-[110px_150px_minmax(0,1fr)] ${task.variant === 'accent' ? 'border-l-[3px] border-text pl-3' : ''}`}>
-                <span className="font-mono text-[11px] font-semibold text-text">{task.time_label}</span>
-                <span className="border-l-2 border-border-strong pl-2 font-mono text-[10px] font-bold uppercase leading-relaxed tracking-wide text-text">{lane.room}<br /><span className="font-normal text-text-faint">{lane.floor}</span></span>
-                <div className="flex items-start gap-2"><div className="flex-1"><TaskRow task={task} showTime={false} canCheck={canCheckTask(task)} assigneeName={profileLabel(profileById(task.assigned_to))} onToggle={requestToggleTask} /></div>{isAdmin && <DeleteButton itemLabel={task.what} confirmText="Eliminar tarea (se puede restaurar desde la papelera)" onConfirm={() => deleteTask(task.id)} className="mt-2" />}</div>
+            {!showStructure && <div className="mt-4 overflow-hidden border border-border-strong">
+              <div className="hidden bg-surface-2 sm:grid sm:grid-cols-[110px_170px_minmax(0,1fr)]">
+                <span className="border-r border-border-strong px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-text-dim">Hora</span>
+                <span className="border-r border-border-strong px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-text-dim">Espacio</span>
+                <span className="px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-text-dim">Actividad</span>
+              </div>
+              {orderedTasks.map(({ lane, task }, index) => <div key={task.id} className={`grid sm:grid-cols-[110px_170px_minmax(0,1fr)] ${index > 0 ? 'border-t border-border' : ''}`}>
+                <span className="border-b border-border px-3 py-3 font-mono text-[11px] font-semibold tabular-nums text-text sm:border-b-0 sm:border-r sm:border-border-strong">{task.time_label || '—'}</span>
+                <span className="border-b border-border px-3 py-2.5 font-mono text-[10px] font-bold uppercase leading-relaxed tracking-wide text-text sm:border-b-0 sm:border-r sm:border-border-strong">{lane.room}<br /><span className="font-normal text-text-faint">{lane.floor}</span></span>
+                <div className="flex items-start gap-2 px-3 py-3"><div className="flex-1"><TaskRow task={task} showTime={false} contained canCheck={canCheckTask(task)} assigneeName={profileLabel(profileById(task.assigned_to))} onToggle={requestToggleTask} /></div>{isAdmin && <DeleteButton itemLabel={task.what} confirmText="Eliminar tarea (se puede restaurar desde la papelera)" onConfirm={() => deleteTask(task.id)} />}</div>
               </div>)}
             </div>}
 
