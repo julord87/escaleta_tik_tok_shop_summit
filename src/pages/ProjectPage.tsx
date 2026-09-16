@@ -6,6 +6,7 @@ import { DayCalendarPicker } from '../components/DayCalendarPicker'
 import { TaskRow, profileLabel } from '../components/TaskRow'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { DeleteButton } from '../components/DeleteButton'
+import { PublicShareButton } from '../components/PublicShareButton'
 import type { DbTask, Role, TaskVariant } from '../types/db'
 
 interface Pending {
@@ -25,6 +26,7 @@ export function ProjectPage() {
     addDay, deleteDay, addLane, deleteLane, addTask, deleteTask, restoreTask,
     addOpenItem, deleteOpenItem, addCrewPanel, deleteCrewPanel, addContact, deleteContact,
     addMemberByEmail, updateMemberRole, removeMember,
+    setPublicShare,
   } = data
 
   const isAdmin = myRole === 'admin'
@@ -97,6 +99,7 @@ export function ProjectPage() {
           <div className="font-semibold text-text">{project.event}</div>
           <div>{project.venue}</div>
           <div>{project.dates}</div>
+          {isAdmin && <div className="mt-2"><PublicShareButton enabled={project.public_share_enabled} onSetEnabled={setPublicShare} /></div>}
         </div>
       </header>
 

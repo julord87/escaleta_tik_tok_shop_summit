@@ -13,6 +13,7 @@ export interface Project {
   event: string | null
   venue: string | null
   dates: string | null
+  public_share_enabled: boolean
   created_by: string | null
   created_at: string
 }

@@ -210,6 +210,16 @@ export function useProjectData(projectId: string | undefined) {
     await reload()
   }
 
+  async function setPublicShare(enabled: boolean) {
+    if (!projectId) return { error: 'no project' }
+    const { error } = await supabase
+      .from('projects')
+      .update({ public_share_enabled: enabled })
+      .eq('id', projectId)
+    if (!error) await reload()
+    return { error: error?.message ?? null }
+  }
+
   return {
     project,
     members,
@@ -240,5 +250,6 @@ export function useProjectData(projectId: string | undefined) {
     addMemberByEmail,
     updateMemberRole,
     removeMember,
+    setPublicShare,
   }
 }

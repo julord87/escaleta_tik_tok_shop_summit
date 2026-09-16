@@ -3,6 +3,7 @@ import { useAuth } from './lib/AuthContext'
 import { LoginPage } from './pages/LoginPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { ProjectPage } from './pages/ProjectPage'
+import { PublicProjectPage } from './pages/PublicProjectPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -16,6 +17,7 @@ function App() {
 
   return (
     <Routes>
+      <Route path="/p/:id" element={<PublicProjectPage />} />
       <Route path="/login" element={loading ? null : user ? <Navigate to="/projects" replace /> : <LoginPage />} />
       <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
       <Route path="/projects/:id" element={<ProtectedRoute><ProjectPage /></ProtectedRoute>} />
