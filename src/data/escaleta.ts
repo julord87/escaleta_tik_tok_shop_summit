@@ -11,8 +11,8 @@ export const meta = {
 export const metaStrip = [
   { text: 'Responsable AV', bold: 'Julian Martinez' },
   { text: 'GBS', bold: '12:15–16:00 · 250 pax' },
-  { text: 'TTS', bold: '16:10–20:30 · 300 pax' },
-  { text: 'Hoy MAR 15 → Reunion AV JUE 17 → Montaje 21 → Evento 22', solid: true },
+  { text: 'TTS', bold: '16:00–19:45 · 300 pax' },
+  { text: 'Hoy MIE 16 → Reunion AV JUE 17 → Montaje 21 → Evento 22', solid: true },
 ]
 
 export const days: EscaletaDay[] = [
@@ -78,6 +78,7 @@ export const days: EscaletaDay[] = [
         room: 'Pre-apertura',
         floor: 'Todas las salas',
         tasks: [
+          { id: 'pa1', time: '08:00–10:00', what: 'Ensayo onsite GBS con speakers y host Pablo Meixe', meta: 'GBS + AV EXPRESS · SW: JULIAN' },
           { id: 'pa2', time: 'MANANA', what: 'Pruebas finales: Symphony, pantallas, playlists cargadas en las 3 plantas', meta: 'AV EXPRESS + CUBENSIS · SW: JULIAN' },
         ],
       },
@@ -85,16 +86,21 @@ export const days: EscaletaDay[] = [
         room: 'GBS',
         floor: 'Sala Plenaria',
         tasks: [
-          { id: 'gb1', time: '12:15', what: 'Entrada GBS · LED wall, audio e iluminacion en show', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
-          { id: 'gb2', time: '16:00', what: 'Salida GBS · cambio de setup: quitar sillas, montar mesas altas', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
+          { id: 'gb1', time: '12:15–12:45', what: 'Llegada GBS · sala, LED wall, audio e iluminacion en show', meta: 'AV EXPRESS + GBS · SW: JULIAN', variant: 'accent' },
+          { id: 'gb2', time: '12:50–12:54', what: 'Apertura: Pablo Meixe · música, countdown, sizzle y voice-over', meta: 'GBS + AV EXPRESS · SW: JULIAN' },
+          { id: 'gb3', time: '12:54–13:27', what: 'Welcome & New Era (Teba), Watch It Love It (Judith), juego de Pablo y Want It Success Stories (Neus)', meta: 'GBS + AV EXPRESS · SW: JULIAN' },
+          { id: 'gb4', time: '13:27–13:43', what: 'Client panel: TikTok, L’Oréal, Desigual y Scuffers', meta: 'GBS + AV EXPRESS · SW: JULIAN', variant: 'accent' },
+          { id: 'gb5', time: '13:43–14:30', what: 'Full-funnel Measurement (Marina), Winning Peak (Adrián) y cierre de Pablo', meta: 'GBS + AV EXPRESS · SW: JULIAN' },
+          { id: 'gb6', time: '14:30–16:00', what: 'Networking GBS: bites y drinks; mantener ambiente y pantallas', meta: 'GBS + AV EXPRESS · SW: JULIAN' },
+          { id: 'gb7', time: '16:00', what: 'Cambio de setup: quitar sillas y montar mesas altas', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
         ],
       },
       {
         room: 'TikTok Shop',
         floor: 'Todo el venue',
         tasks: [
-          { id: 'tt1', time: '16:10', what: 'Entrada TTS · Agency Hub, demo Starlight en Sala Escenario, Symphony activo', meta: 'AV EXPRESS + CUBENSIS · SW: JULIAN', variant: 'accent' },
-          { id: 'tt2', time: '20:30', what: 'Salida TTS · cierre de jornada de show', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
+          { id: 'tt1', time: '16:00–16:20', what: 'Entrada TTS · Agency Hub, demo Starlight en Sala Escenario, Symphony activo', meta: 'AV EXPRESS + CUBENSIS · SW: JULIAN', variant: 'accent' },
+          { id: 'tt2', time: '18:45–19:45', what: 'Matchmaking, networking, food y cierre TTS', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
         ],
       },
       {
@@ -137,14 +143,14 @@ export const openItems: OpenItem[] = [
   { id: 'o5', label: 'Gobo TTS: pedir el texto final a Laura para preparar el arte (deadline 21/sep — preparar template mientras se espera)', who: 'TTS (LAURA) · SW: JULIAN' },
   { id: 'o7', label: 'Musica ambiente: RESUELTO — Ellie confirmo por Lark que Spotify esta bien (10/sep), se resuelve con las 3 playlists ya armadas. Falta cerrar musica de entrada/salida al escenario (walk-on/walk-off), ver o14', who: 'SW: JULIAN' },
   { id: 'o8', label: 'Microfonos: 1-2 diademas de backup + capacidad del splitter RF (6-7 canales) pedido por correo a AV Express (15/sep), pendiente respuesta', who: 'AV EXPRESS · SW: JULIAN' },
-  { id: 'o9', label: 'Agenda GBS: RESUELTO — doc de Lark "ES Commerce on TikTok | Scripts" revisado. Panel mas grande (Client panel, 13:27-13:43) es de 4 personas (Paloma/TikTok, L\'Oreal, Desigual, Scuffers/Pablo) — el kit de 5+2 mics cubre de sobra', who: 'SW: JULIAN' },
+  { id: 'o9', label: 'Agenda GBS: RESUELTA — show 12:50–14:30 y networking hasta 16:00. Panel 13:27–13:43: TikTok, L’Oréal, Desigual y Scuffers. Faltan roster final y necesidades exactas para cerrar microfonía.', who: 'GBS · SW: JULIAN' },
   { id: 'o10', label: 'Contenido de pantallas (principal + pantallas pequenas): draft 17/sep, version final sin cambios 20/sep — viajamos a Madrid el 21/sep', who: 'TTS + GBS · SW: JULIAN' },
-  { id: 'o16', label: 'Agenda TTS: RESUELTA — sheet de Lark (16/sep). 16:00-19:45h: keynote + 4 paneles ACE + premios + networking. Panel mas grande confirmado (Assortment, 17:15h) = 5 personas en mic simultaneo, el kit de 5 diademas lo cubre justo sin margen. Paneles "Content" y "Empowerment/GMV Max" aun sin speakers confirmados — riesgo de sumar mas gente de la prevista, revisar antes de cerrar o8', who: 'TTS · SW: JULIAN' },
+  { id: 'o16', label: 'Agenda TTS: RESUELTA — 16:00–19:45: keynote, 4 paneles ACE, premios y networking. El panel Assortment (16:45–17:15) llega a 5 voces simultáneas: las 5 diademas cubren justo, sin margen. Content y Empowerment/GMV Max siguen sin speakers cerrados.', who: 'TTS · SW: JULIAN' },
   { id: 'o11', label: 'Ensayo agencia Live Media (staff): por la manana, falta duracion y hora exacta — Wing ya lo esta gestionando, falta cruzarlo con AV Express', who: 'SW: JULIAN' },
-  { id: 'o12', label: 'Hoja de Ruta para MC/presentador de TikTok GBS: venue, hora de llegada, ensayo, contacto de Julian — enviar al manager cuando Marta/Olenka pasen sus datos (Julian es el punto de contacto)', who: 'GBS · SW: JULIAN' },
+  { id: 'o12', label: 'Hoja de Ruta GBS: Pablo Meixe confirmado como host. Incluye ensayo onsite 08:00–10:00, llegada, cues de apertura y contacto de Julián. Falta el contacto directo de su manager para enviarla.', who: 'GBS · SW: JULIAN' },
   { id: 'o13', label: 'Confirmar con cliente TT Shop quien hace de presentador/a en su parte (Olenka cree que no tienen creador famoso, lo hacen ellos mismos — verificar)', who: 'TTS · SW: JULIAN' },
   { id: 'o14', label: 'Musica de entrada/salida al escenario (walk-on/walk-off), GBS y TTS: preguntado por Lark el 15/sep (a Ellie/Lottie en ingles y a Laura Garcia en español) — si tienen pistas especificas o las propone Smartworks. Sin respuesta aun', who: 'GBS + TTS · SW: JULIAN' },
-  { id: 'o15', label: 'KV del evento / que se muestra en pantalla cuando no hay contenido activo, GBS y TTS: preguntado por Lark el 15/sep. Sin respuesta aun. (Confidence monitors ya resuelto: notas del speaker van debajo de cada slide, confirmado 15/sep)', who: 'GBS + TTS · SW: JULIAN' },
+  { id: 'o15', label: 'KV / pantalla idle GBS y TTS: pendiente respuesta. Confidence monitor GBS es P0 hoy 16/sep: recibir y validar las notas por bloque antes de cerrar el guion técnico.', who: 'GBS + TTS · SW: JULIAN' },
 ]
 
 export const contacts: Contact[] = [
@@ -153,4 +159,4 @@ export const contacts: Contact[] = [
   { initial: 'T', role: 'Cubensis · Symphony', name: 'Tomas Sequeiros', lines: ['tomas@cubensisproject.com', '654 447 548'] },
 ]
 
-export const footerNote = 'Borrador de trabajo — confirmar horas exactas en la reunion de AV del jueves'
+export const footerNote = 'Actualizado 16.SEP — confirmar únicamente los puntos marcados como pendientes en la reunión de AV del jueves'
