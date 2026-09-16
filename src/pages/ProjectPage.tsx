@@ -7,6 +7,7 @@ import { TaskRow, profileLabel } from '../components/TaskRow'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { DeleteButton } from '../components/DeleteButton'
 import { PublicShareButton } from '../components/PublicShareButton'
+import { chronologicalTasks } from '../lib/schedule'
 import type { DbTask, Role, TaskVariant } from '../types/db'
 
 interface Pending {
@@ -36,6 +37,7 @@ export function ProjectPage() {
   const [showMembers, setShowMembers] = useState(false)
   const [showTrash, setShowTrash] = useState(false)
   const [showAddDay, setShowAddDay] = useState(false)
+  const [showStructure, setShowStructure] = useState(false)
 
   const selectedDay = useMemo(
     () => days.find((d) => d.id === selectedDayId) ?? days[0] ?? null,
@@ -86,6 +88,7 @@ export function ProjectPage() {
   }
 
   const filteredOpenItems = assigneeFilter === 'all' ? openItems : openItems.filter((o) => o.assigned_to === assigneeFilter)
+  const orderedTasks = chronologicalTasks(selectedDay, assigneeFilter === 'all' ? undefined : assigneeFilter)
 
   return (
     <div className="mx-auto max-w-[1040px] px-5 pb-16">
@@ -99,7 +102,6 @@ export function ProjectPage() {
           <div className="font-semibold text-text">{project.event}</div>
           <div>{project.venue}</div>
           <div>{project.dates}</div>
-          {isAdmin && <div className="mt-2"><PublicShareButton enabled={project.public_share_enabled} onSetEnabled={setPublicShare} /></div>}
         </div>
       </header>
 
@@ -119,6 +121,7 @@ export function ProjectPage() {
         </select>
         {isAdmin && (
           <div className="ml-auto flex gap-2">
+            <PublicShareButton enabled={project.public_share_enabled} onSetEnabled={setPublicShare} />
             <button onClick={() => setShowTrash((s) => !s)} className="rounded-full border-[2.5px] border-border-strong px-3 py-1.5 font-mono text-[11.5px] text-text-dim">
               Papelera{trashedTasks.length > 0 ? ` (${trashedTasks.length})` : ''}
             </button>
@@ -162,7 +165,17 @@ export function ProjectPage() {
             </div>
             {selectedDay.description && <p className="mt-1.5 max-w-[64ch] text-[13.5px] text-text-dim">{selectedDay.description}</p>}
 
-            <div className="mt-4 flex flex-col divide-y divide-border border-t border-border">
+            {isAdmin && <div className="mt-3"><button type="button" onClick={() => setShowStructure((value) => !value)} className="font-mono text-[10.5px] text-text-faint underline">{showStructure ? 'Volver a orden cronológico' : 'Editar estructura por sala'}</button></div>}
+
+            {!showStructure && <div className="mt-4 divide-y divide-border border-t-2 border-text">
+              {orderedTasks.map(({ lane, task }) => <div key={task.id} className={`grid gap-2 py-3 sm:grid-cols-[110px_150px_minmax(0,1fr)] ${task.variant === 'accent' ? 'bg-yellow px-3' : ''}`}>
+                <span className="font-mono text-[11px] font-semibold text-text">{task.time_label}</span>
+                <span className="font-mono text-[10px] uppercase tracking-wide text-text-faint">{lane.room}<br />{lane.floor}</span>
+                <div className="flex items-start gap-2"><div className="flex-1"><TaskRow task={task} showTime={false} canCheck={canCheckTask(task)} assigneeName={profileLabel(profileById(task.assigned_to))} onToggle={requestToggleTask} /></div>{isAdmin && <DeleteButton itemLabel={task.what} confirmText="Eliminar tarea (se puede restaurar desde la papelera)" onConfirm={() => deleteTask(task.id)} className="mt-2" />}</div>
+              </div>)}
+            </div>}
+
+            {showStructure && <div className="mt-4 flex flex-col divide-y divide-border border-t border-border">
               {selectedDay.lanes.map((lane) => {
                 const tasks = assigneeFilter === 'all' ? lane.tasks : lane.tasks.filter((t) => t.assigned_to === assigneeFilter)
                 if (assigneeFilter !== 'all' && tasks.length === 0) return null
@@ -191,8 +204,8 @@ export function ProjectPage() {
                   </div>
                 )
               })}
-            </div>
-            {isAdmin && <AddLaneForm onSubmit={(v) => addLane(selectedDay.id, v)} />}
+            </div>}
+            {isAdmin && showStructure && <AddLaneForm onSubmit={(v) => addLane(selectedDay.id, v)} />}
           </div>
         )}
       </section>

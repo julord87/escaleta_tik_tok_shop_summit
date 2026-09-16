@@ -2,12 +2,13 @@ import type { DbTask, Profile } from '../types/db'
 
 interface Props {
   task: DbTask
+  showTime?: boolean
   canCheck: boolean
   assigneeName: string | null
   onToggle: (task: DbTask, next: boolean) => void
 }
 
-export function TaskRow({ task, canCheck, assigneeName, onToggle }: Props) {
+export function TaskRow({ task, showTime = true, canCheck, assigneeName, onToggle }: Props) {
   const isAccent = task.variant === 'accent'
   const isQuiet = task.variant === 'quiet'
 
@@ -25,9 +26,9 @@ export function TaskRow({ task, canCheck, assigneeName, onToggle }: Props) {
         onChange={(e) => onToggle(task, e.target.checked)}
         className="mt-0.5 h-[15px] w-[15px] shrink-0 cursor-pointer rounded border-[2.5px] border-border-strong accent-text disabled:cursor-not-allowed"
       />
-      <span className={`w-12 shrink-0 font-mono text-[11px] tabular-nums ${isAccent ? 'font-bold text-text' : isQuiet ? 'text-text-faint' : 'text-text-dim'}`}>
+      {showTime && <span className={`w-12 shrink-0 font-mono text-[11px] tabular-nums ${isAccent ? 'font-bold text-text' : isQuiet ? 'text-text-faint' : 'text-text-dim'}`}>
         {task.time_label}
-      </span>
+      </span>}
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className={`text-[13px] leading-snug ${task.checked ? 'text-text-faint line-through' : isQuiet ? 'text-text-dim' : 'text-text'}`}>
           {task.what}
