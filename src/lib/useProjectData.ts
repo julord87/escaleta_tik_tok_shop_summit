@@ -141,7 +141,7 @@ export function useProjectData(projectId: string | undefined) {
   }
   async function addTask(
     laneId: string,
-    input: { time_label: string; what: string; meta: string; who: string; variant: TaskVariant; assigned_to: string | null },
+    input: { time_label: string; what: string; meta: string; who: string; note: string; variant: TaskVariant; assigned_to: string | null },
   ) {
     await supabase.from('tasks').insert({ lane_id: laneId, ...input })
     await reload()

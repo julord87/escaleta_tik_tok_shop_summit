@@ -40,11 +40,16 @@ export function ProjectPage() {
   const [showAddDay, setShowAddDay] = useState(false)
   const [showStructure, setShowStructure] = useState(false)
   const [editingTask, setEditingTask] = useState<DbTask | null>(null)
+  const [creatingTask, setCreatingTask] = useState(false)
 
   const selectedDay = useMemo(
     () => days.find((d) => d.id === selectedDayId) ?? days[0] ?? null,
     [days, selectedDayId],
   )
+  const providerOptions = useMemo(() => Array.from(new Set([
+    ...contacts.map((contact) => contact.name).filter((name): name is string => Boolean(name)),
+    ...days.flatMap((day) => day.lanes.flatMap((lane) => lane.tasks.map((task) => task.meta))).filter((value): value is string => Boolean(value)),
+  ])).sort((a, b) => a.localeCompare(b)), [contacts, days])
 
   function profileById(uid: string | null) {
     return members.find((m) => m.user_id === uid)?.profile ?? null
@@ -123,12 +128,13 @@ export function ProjectPage() {
         </select>
         {isAdmin && (
           <div className="ml-auto flex gap-2">
+            <button onClick={() => setCreatingTask(true)} className="rounded-full bg-text px-3.5 py-1.5 font-mono text-[11.5px] font-semibold text-white">+ Nueva tarea</button>
             <PublicShareButton enabled={project.public_share_enabled} onSetEnabled={setPublicShare} />
-            <button onClick={() => setShowTrash((s) => !s)} className="rounded-full border-[2.5px] border-border-strong px-3 py-1.5 font-mono text-[11.5px] text-text-dim">
-              Papelera{trashedTasks.length > 0 ? ` (${trashedTasks.length})` : ''}
-            </button>
             <button onClick={() => setShowMembers((s) => !s)} className="rounded-full border-[2.5px] border-border-strong px-3 py-1.5 font-mono text-[11.5px] text-text-dim">
               Miembros
+            </button>
+            <button onClick={() => setShowTrash((s) => !s)} className="rounded-full border-[2.5px] border-border-strong px-3 py-1.5 font-mono text-[11.5px] text-text-dim">
+              Papelera{trashedTasks.length > 0 ? ` (${trashedTasks.length})` : ''}
             </button>
           </div>
         )}
@@ -206,7 +212,6 @@ export function ProjectPage() {
                           )}
                         </div>
                       ))}
-                      {isAdmin && <AddTaskForm members={members} onSubmit={(v) => addTask(lane.id, v)} />}
                     </div>
                   </div>
                 )
@@ -297,7 +302,8 @@ export function ProjectPage() {
         onConfirm={confirmPending}
         onCancel={() => setPending(null)}
       />
-      {editingTask && <EditTaskModal task={editingTask} members={members} onCancel={() => setEditingTask(null)} onSubmit={async (values) => { await updateTask(editingTask.id, values); setEditingTask(null) }} />}
+      {editingTask && <EditTaskModal task={editingTask} members={members} providers={providerOptions} onCancel={() => setEditingTask(null)} onSubmit={async (values) => { await updateTask(editingTask.id, values); setEditingTask(null) }} />}
+      {creatingTask && selectedDay && <NewTaskModal lanes={selectedDay.lanes} members={members} providers={providerOptions} onCancel={() => setCreatingTask(false)} onSubmit={async (laneId, values) => { await addTask(laneId, values); setCreatingTask(false) }} />}
     </div>
   )
 }
@@ -413,41 +419,6 @@ function AddLaneForm({ onSubmit }: { onSubmit: (v: { room: string; floor: string
   )
 }
 
-function AddTaskForm({ members, onSubmit }: {
-  members: { user_id: string; profile?: { full_name: string | null; email: string | null } }[]
-  onSubmit: (v: { time_label: string; what: string; meta: string; who: string; variant: TaskVariant; assigned_to: string | null }) => void
-}) {
-  const [show, setShow] = useState(false)
-  const [time_label, setTime] = useState('')
-  const [what, setWhat] = useState('')
-  const [meta, setMeta] = useState('')
-  const [who, setWho] = useState('')
-  const [variant, setVariant] = useState<TaskVariant>('normal')
-  const [assigned_to, setAssigned] = useState('')
-  if (!show) return <button onClick={() => setShow(true)} className="mt-2 self-start font-mono text-[11px] text-text-dim underline">+ tarea</button>
-  return (
-    <form
-      onSubmit={(e) => { e.preventDefault(); onSubmit({ time_label, what, meta, who, variant, assigned_to: assigned_to || null }); setShow(false); setTime(''); setWhat(''); setMeta(''); setWho(''); setVariant('normal'); setAssigned('') }}
-      className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2"
-    >
-      <input required placeholder="Hora" value={time_label} onChange={(e) => setTime(e.target.value)} className="w-20 rounded-lg border border-border px-2 py-1.5 text-[12px]" />
-      <input required placeholder="Tarea" value={what} onChange={(e) => setWhat(e.target.value)} className="min-w-[180px] flex-1 rounded-lg border border-border px-2 py-1.5 text-[12px]" />
-      <input placeholder="Proveedor" value={meta} onChange={(e) => setMeta(e.target.value)} className="rounded-lg border border-border px-2 py-1.5 text-[12px]" />
-      <input placeholder="Responsable (si no es de Smartworks)" value={who} onChange={(e) => setWho(e.target.value)} className="rounded-lg border border-border px-2 py-1.5 text-[12px]" />
-      <select value={variant} onChange={(e) => setVariant(e.target.value as TaskVariant)} className="rounded-lg border border-border px-2 py-1.5 font-mono text-[11px]">
-        <option value="normal">normal</option>
-        <option value="accent">accent</option>
-        <option value="quiet">quiet</option>
-      </select>
-      <select value={assigned_to} onChange={(e) => setAssigned(e.target.value)} className="rounded-lg border border-border px-2 py-1.5 font-mono text-[11px]">
-        <option value="">sin asignar (Smartworks)</option>
-        {members.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email}</option>)}
-      </select>
-      <button type="submit" className="rounded-lg bg-text px-3 py-1.5 font-mono text-[11px] text-white">Agregar</button>
-    </form>
-  )
-}
-
 function EditTaskButton({ onClick }: { onClick: () => void }) {
   return (
     <button
@@ -465,9 +436,10 @@ function EditTaskButton({ onClick }: { onClick: () => void }) {
   )
 }
 
-function EditTaskModal({ task, members, onCancel, onSubmit }: {
+function EditTaskModal({ task, members, providers, onCancel, onSubmit }: {
   task: DbTask
   members: { user_id: string; profile?: { full_name: string | null; email: string | null } }[]
+  providers: string[]
   onCancel: () => void
   onSubmit: (v: Pick<DbTask, 'time_label' | 'what' | 'meta' | 'who' | 'note' | 'variant' | 'assigned_to'>) => Promise<void>
 }) {
@@ -514,16 +486,69 @@ function EditTaskModal({ task, members, onCancel, onSubmit }: {
           {timeMode === 'range' && <><Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field><Field label="Fin"><input required type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={fieldClass} /></Field></>}
           {timeMode === 'flexible' && <Field label="Franja"><input required placeholder="Ej. Durante montaje" value={flexibleTime} onChange={(e) => setFlexibleTime(e.target.value)} className={fieldClass} /></Field>}
           <Field label="Tarea"><input required value={what} onChange={(e) => setWhat(e.target.value)} className={fieldClass} /></Field>
-          <Field label="Proveedor"><input value={meta} onChange={(e) => setMeta(e.target.value)} className={fieldClass} /></Field>
-          <Field label="Responsable"><input value={who} onChange={(e) => setWho(e.target.value)} className={fieldClass} /></Field>
-          <Field label="Asignar"><select value={assigned_to} onChange={(e) => setAssigned(e.target.value)} className={fieldClass}><option value="">Sin asignar</option>{members.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email}</option>)}</select></Field>
+          <Field label="Proveedor / contacto"><input value={meta} onChange={(e) => setMeta(e.target.value)} list="provider-options" className={fieldClass} /></Field>
+          <Field label="Contacto externo"><input value={who} onChange={(e) => setWho(e.target.value)} className={fieldClass} /></Field>
+          <Field label="Responsable Smartworks"><select value={assigned_to} onChange={(e) => setAssigned(e.target.value)} className={fieldClass}><option value="">Sin asignar</option>{members.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email}</option>)}</select></Field>
           <Field label="Énfasis"><select value={variant} onChange={(e) => setVariant(e.target.value as TaskVariant)} className={fieldClass}><option value="normal">Normal</option><option value="accent">Destacada</option><option value="quiet">Secundaria</option></select></Field>
           <div className="sm:col-span-2"><Field label="Notas"><textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} className={`${fieldClass} resize-y`} /></Field></div>
         </div>
+        <datalist id="provider-options">{providers.map((provider) => <option key={provider} value={provider} />)}</datalist>
         <div className="mt-6 flex justify-end gap-2 border-t border-border pt-4">
           <button type="button" onClick={onCancel} className="rounded-md px-3 py-2 font-mono text-[11px] text-text-dim">Cancelar</button>
           <button disabled={saving} type="submit" className="rounded-md bg-text px-4 py-2 font-mono text-[11px] font-semibold text-white disabled:opacity-60">{saving ? 'Guardando…' : 'Guardar cambios'}</button>
         </div>
+      </form>
+    </div>
+  )
+}
+
+function NewTaskModal({ lanes, members, providers, onCancel, onSubmit }: {
+  lanes: { id: string; room: string | null; floor: string | null }[]
+  members: { user_id: string; profile?: { full_name: string | null; email: string | null } }[]
+  providers: string[]
+  onCancel: () => void
+  onSubmit: (laneId: string, values: { time_label: string; what: string; meta: string; who: string; note: string; variant: TaskVariant; assigned_to: string | null }) => Promise<void>
+}) {
+  const [laneId, setLaneId] = useState(lanes[0]?.id ?? '')
+  const [timeMode, setTimeMode] = useState<'fixed' | 'range' | 'flexible'>('fixed')
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
+  const [flexibleTime, setFlexibleTime] = useState('')
+  const [what, setWhat] = useState('')
+  const [meta, setMeta] = useState('')
+  const [who, setWho] = useState('')
+  const [note, setNote] = useState('')
+  const [variant, setVariant] = useState<TaskVariant>('normal')
+  const [assigned_to, setAssigned] = useState('')
+  const [saving, setSaving] = useState(false)
+  const fieldClass = 'w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-[13px] text-text outline-none transition-colors duration-150 focus:border-text focus:ring-2 focus:ring-text/15'
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault()
+    setSaving(true)
+    const time_label = timeMode === 'range' ? `${startTime}–${endTime}` : timeMode === 'fixed' ? startTime : flexibleTime
+    await onSubmit(laneId, { time_label, what, meta, who, note, variant, assigned_to: assigned_to || null })
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-black/30 p-3 sm:items-center sm:justify-center" role="dialog" aria-modal="true" aria-labelledby="new-task-title">
+      <form onSubmit={submit} className="w-full max-w-xl border border-border-strong bg-surface p-5 shadow-xl sm:p-6">
+        <div className="mb-5 flex items-start justify-between gap-4"><div><p className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-text-faint">Administración</p><h3 id="new-task-title" className="mt-1 text-lg font-bold text-text">Nueva tarea</h3></div><button type="button" onClick={onCancel} className="h-9 px-2 font-mono text-[11px] text-text-dim underline">Cancelar</button></div>
+        <div className="grid gap-3 sm:grid-cols-[110px_1fr]">
+          <Field label="Espacio"><select required value={laneId} onChange={(e) => setLaneId(e.target.value)} className={fieldClass}>{lanes.map((lane) => <option key={lane.id} value={lane.id}>{[lane.room, lane.floor].filter(Boolean).join(' · ')}</option>)}</select></Field>
+          <Field label="Horario"><select value={timeMode} onChange={(e) => setTimeMode(e.target.value as 'fixed' | 'range' | 'flexible')} className={fieldClass}><option value="fixed">Hora fija</option><option value="range">Inicio y fin</option><option value="flexible">Franja libre</option></select></Field>
+          {timeMode === 'fixed' && <Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field>}
+          {timeMode === 'range' && <><Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field><Field label="Fin"><input required type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={fieldClass} /></Field></>}
+          {timeMode === 'flexible' && <Field label="Franja"><input required placeholder="Ej. Durante montaje" value={flexibleTime} onChange={(e) => setFlexibleTime(e.target.value)} className={fieldClass} /></Field>}
+          <Field label="Tarea"><input required value={what} onChange={(e) => setWhat(e.target.value)} className={fieldClass} /></Field>
+          <Field label="Proveedor / contacto"><input value={meta} onChange={(e) => setMeta(e.target.value)} list="provider-options-new" className={fieldClass} /></Field>
+          <Field label="Contacto externo"><input value={who} onChange={(e) => setWho(e.target.value)} className={fieldClass} /></Field>
+          <Field label="Responsable Smartworks"><select value={assigned_to} onChange={(e) => setAssigned(e.target.value)} className={fieldClass}><option value="">Sin asignar</option>{members.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email}</option>)}</select></Field>
+          <Field label="Énfasis"><select value={variant} onChange={(e) => setVariant(e.target.value as TaskVariant)} className={fieldClass}><option value="normal">Normal</option><option value="accent">Destacada</option><option value="quiet">Secundaria</option></select></Field>
+          <div className="sm:col-span-2"><Field label="Notas"><textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} className={`${fieldClass} resize-y`} /></Field></div>
+        </div>
+        <datalist id="provider-options-new">{providers.map((provider) => <option key={provider} value={provider} />)}</datalist>
+        <div className="mt-6 flex justify-end gap-2 border-t border-border pt-4"><button type="button" onClick={onCancel} className="rounded-md px-3 py-2 font-mono text-[11px] text-text-dim">Cancelar</button><button disabled={saving || !lanes.length} type="submit" className="rounded-md bg-text px-4 py-2 font-mono text-[11px] font-semibold text-white disabled:opacity-60">{saving ? 'Guardando…' : 'Crear tarea'}</button></div>
       </form>
     </div>
   )
