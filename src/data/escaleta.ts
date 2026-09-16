@@ -12,7 +12,7 @@ export const metaStrip = [
   { text: 'Responsable AV', bold: 'Julian Martinez' },
   { text: 'GBS', bold: '12:15–16:00 · 220–250 pax' },
   { text: 'TTS', bold: '16:10–20:30 · 280–300 pax' },
-  { text: 'Hoy LUN 14 → Reunion AV JUE 17 → Montaje 21 → Evento 22', solid: true },
+  { text: 'Hoy MIE 16 → Reunion AV JUE 17 → Montaje 21 → Evento 22', solid: true },
 ]
 
 export const days: EscaletaDay[] = [
@@ -29,15 +29,15 @@ export const days: EscaletaDay[] = [
         tasks: [
           { id: 'sp1', time: 'TARDE', what: 'Marcar en el suelo posiciones de sillas, stands y mobiliario', meta: 'AV EXPRESS · SW: JULIAN' },
           { id: 'sp2', time: 'TARDE', what: 'Validar LED wall 6x3,5m + control (montaje reutilizado del evento anterior — confirmado)', meta: 'AV EXPRESS · SW: JULIAN' },
-          { id: 'sp3', time: 'NOCHE', what: 'Cargar agenda + layout GBS/TTS y 2 gobos en USB, imagen fija', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
+          { id: 'sp3', time: 'NOCHE', what: 'Cargar agenda + layout GBS/TTS y gobos confirmados en USB, imagen fija', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
         ],
       },
       {
         room: 'Symphony',
         floor: 'Planta 2 · Cubensis',
         tasks: [
-          { id: 'sy1', time: '17:00', what: 'Montaje del juego · totem tactil vertical, backdrop 250×250cm + linoleo 2,5×2,5m', meta: 'CUBENSIS · SW: JULIAN' },
-          { id: 'sy2', time: 'NOCHE', what: 'Test con AV: portatil de respaldo (Cubensis) conectado por HDMI al totem', meta: 'CUBENSIS + AV EXPRESS · SW: JULIAN', variant: 'accent' },
+          { id: 'sy1', time: '22:00', what: 'Montaje del juego · totem tactil vertical, backdrop 250×250cm + linoleo 2,5×2,5m', meta: 'CUBENSIS · SW: JULIAN' },
+          { id: 'sy2', time: 'POST MONTAJE', what: 'Test con AV: portatil de respaldo (Cubensis) conectado por HDMI al totem', meta: 'CUBENSIS + AV EXPRESS · SW: JULIAN', variant: 'accent' },
         ],
       },
       {
@@ -52,7 +52,7 @@ export const days: EscaletaDay[] = [
         room: 'Sala de Cristal',
         floor: 'Planta 2',
         tasks: [
-          { id: 'sc1', time: 'TARDE', what: 'Montaje pantalla(s) — verificar 2×totem 50" vs 1×98"', meta: 'AV EXPRESS · SW: JULIAN', variant: 'quiet' },
+          { id: 'sc1', time: 'TARDE', what: 'Montaje de 1× totem vertical 50" (decision de produccion; pendiente confirmacion escrita de AV)', meta: 'AV EXPRESS · SW: JULIAN', variant: 'quiet' },
           { id: 'sc2', time: 'NOCHE', what: 'Carga de contenido, imagen fija por USB', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
         ],
       },
@@ -93,6 +93,7 @@ export const days: EscaletaDay[] = [
         floor: 'Todo el venue',
         tasks: [
           { id: 'tt1', time: '16:10', what: 'Entrada TTS · Agency Hub, demo Starlight en Sala Escenario, Symphony activo', meta: 'AV EXPRESS + CUBENSIS · SW: JULIAN', variant: 'accent' },
+          { id: 'tt-live', time: 'TBC', what: 'Directo TikTok Shop · cliente aporta equipo; confirmar señal, audio de programa, posicion y conectividad dedicada', meta: 'TIKTOK SHOP + AV EXPRESS · SW: JULIAN', variant: 'quiet' },
           { id: 'tt2', time: '20:30', what: 'Salida TTS · cierre de jornada de show', meta: 'AV EXPRESS · SW: JULIAN', variant: 'accent' },
         ],
       },
@@ -120,16 +121,18 @@ export const crew: CrewPanel[] = [
   },
   {
     room: 'Sala de Cristal',
-    crew: { warn: 'A confirmar' },
-    items: ['Audiovisual ×1 (o video + sonido separado)'],
+    crew: { warn: 'A confirmar con AV Express' },
+    items: ['Audiovisual + sonido', '1× totem vertical 50" segun produccion'],
   },
 ]
 
 export const openItems: OpenItem[] = [
-  { id: 'o1', label: 'Sala de Cristal: confirmar si va 2× totem 50" o 1× pantalla 98" (proformas contradictorias)', who: 'AV EXPRESS · SW: JULIAN' },
-  { id: 'o3', label: 'Sonido: cerrar hora exacta de llamada del tecnico', who: 'AV EXPRESS · SW: JULIAN' },
-  { id: 'o4', label: 'Ensayos: definir horario de Starlight para que no choque con el ensayo del keynote', who: 'GBS · SW: JULIAN' },
-  { id: 'o5', label: 'Gobo TTS: pedir el texto final para preparar el arte', who: 'TTS (LAURA) · SW: JULIAN' },
+  { id: 'o1', label: 'Sala de Cristal: AV Express debe confirmar por escrito 1× totem 50" (la proforma aun discrepa)', who: 'AV EXPRESS · SW: JULIAN' },
+  { id: 'o2', label: 'Escaleta de montaje: recibir horarios y composicion de equipo AV/construccion por planta', who: 'AV EXPRESS · SW: JULIAN' },
+  { id: 'o3', label: 'Sonido: cerrar hora exacta de llamada del tecnico y validar 5 diademas + 2 micros de mano para TTS', who: 'AV EXPRESS · SW: JULIAN' },
+  { id: 'o4', label: 'GBS: reclamar agenda final y definir horario de ensayo Starlight sin choque con keynote', who: 'GBS · SW: JULIAN' },
+  { id: 'o5', label: 'Gobo TTS: pedir el texto final y confirmar si el Pack Gobo cubre las dos necesidades', who: 'TTS (LAURA) + AV EXPRESS · SW: JULIAN' },
+  { id: 'o6', label: 'Directo TikTok Shop: cerrar formato, equipos, audio y conectividad; el venue solo ofrece Wi-Fi de invitados', who: 'TIKTOK SHOP · SW: JULIAN' },
   { id: 'o7', label: 'Musica: localizar la nota musical del cliente antes de armar las 3 playlists de Spotify', who: 'SW: JULIAN' },
 ]
 
@@ -139,4 +142,4 @@ export const contacts: Contact[] = [
   { initial: 'T', role: 'Cubensis · Symphony', name: 'Tomas Sequeiros', lines: ['tomas@cubensisproject.com', '654 447 548'] },
 ]
 
-export const footerNote = 'Borrador de trabajo — confirmar horas exactas en la reunion de AV del jueves'
+export const footerNote = 'Version operativa 16 SEP — desbloquear P0 antes de la reunion de AV del jueves'
