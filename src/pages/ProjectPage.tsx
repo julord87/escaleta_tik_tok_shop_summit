@@ -128,7 +128,7 @@ export function ProjectPage() {
         </select>
         {isAdmin && (
           <div className="ml-auto flex gap-2">
-            <button onClick={() => setCreatingTask(true)} className="rounded-full bg-text px-3.5 py-1.5 font-mono text-[11.5px] font-semibold text-white">+ Nueva tarea</button>
+            <button onClick={() => setCreatingTask(true)} className="rounded-full bg-yellow px-3.5 py-1.5 font-mono text-[11.5px] font-semibold text-yellow-contrast transition-colors duration-150 hover:bg-yellow/80">+ Nueva tarea</button>
             <PublicShareButton enabled={project.public_share_enabled} onSetEnabled={setPublicShare} />
             <button onClick={() => setShowMembers((s) => !s)} className="rounded-full border-[2.5px] border-border-strong px-3 py-1.5 font-mono text-[11.5px] text-text-dim">
               Miembros
@@ -184,7 +184,7 @@ export function ProjectPage() {
               {orderedTasks.map(({ lane, task }, index) => <div key={task.id} className={`grid sm:grid-cols-[110px_170px_minmax(0,1fr)] ${index > 0 ? 'border-t border-border' : ''}`}>
                 <span className="border-b border-border px-3 py-3 font-mono text-[11px] font-semibold tabular-nums text-text sm:border-b-0 sm:border-r sm:border-border-strong">{task.time_label || '—'}</span>
                 <span className="border-b border-border px-3 py-2.5 font-mono text-[10px] font-bold uppercase leading-relaxed tracking-wide text-text sm:border-b-0 sm:border-r sm:border-border-strong">{lane.room}<br /><span className="font-normal text-text-faint">{lane.floor}</span></span>
-                <div className="flex items-start gap-2 px-3 py-3"><div className="flex-1"><TaskRow task={task} showTime={false} contained canCheck={canCheckTask(task)} assigneeName={profileLabel(profileById(task.assigned_to))} onToggle={requestToggleTask} /></div>{isAdmin && <><EditTaskButton onClick={() => setEditingTask(task)} /><DeleteButton itemLabel={task.what} confirmText="Eliminar tarea (se puede restaurar desde la papelera)" onConfirm={() => deleteTask(task.id)} /></>}</div>
+                <div className="flex items-start gap-2 px-3 py-3"><div className="flex-1"><TaskRow task={task} showTime={false} contained canCheck={canCheckTask(task)} assigneeName={profileLabel(profileById(task.assigned_to))} isMine={task.assigned_to === user?.id} onToggle={requestToggleTask} /></div>{isAdmin && <><EditTaskButton onClick={() => setEditingTask(task)} /><DeleteButton itemLabel={task.what} confirmText="Eliminar tarea (se puede restaurar desde la papelera)" onConfirm={() => deleteTask(task.id)} /></>}</div>
               </div>)}
             </div>}
 
@@ -205,7 +205,7 @@ export function ProjectPage() {
                       {tasks.map((t) => (
                         <div key={t.id} className="flex items-start gap-2">
                           <div className="flex-1">
-                            <TaskRow task={t} canCheck={canCheckTask(t)} assigneeName={profileLabel(profileById(t.assigned_to))} onToggle={requestToggleTask} />
+                            <TaskRow task={t} canCheck={canCheckTask(t)} assigneeName={profileLabel(profileById(t.assigned_to))} isMine={t.assigned_to === user?.id} onToggle={requestToggleTask} />
                           </div>
                           {isAdmin && (
                             <div className="mt-2 flex items-center gap-1"><EditTaskButton onClick={() => setEditingTask(t)} /><DeleteButton itemLabel={t.what} confirmText="Eliminar tarea (se puede restaurar desde la papelera)" onConfirm={() => deleteTask(t.id)} /></div>
@@ -474,19 +474,15 @@ function EditTaskModal({ task, members, providers, onCancel, onSubmit }: {
           </div>
           <button type="button" onClick={onCancel} className="h-9 px-2 font-mono text-[11px] text-text-dim underline">Cancelar</button>
         </div>
-        <div className="grid gap-3 sm:grid-cols-[110px_1fr]">
-          <Field label="Horario">
-            <select value={timeMode} onChange={(e) => setTimeMode(e.target.value as 'fixed' | 'range' | 'flexible')} className={fieldClass}>
-              <option value="fixed">Hora fija</option>
-              <option value="range">Inicio y fin</option>
-              <option value="flexible">Franja libre</option>
-            </select>
-          </Field>
-          {timeMode === 'fixed' && <Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field>}
-          {timeMode === 'range' && <><Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field><Field label="Fin"><input required type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={fieldClass} /></Field></>}
-          {timeMode === 'flexible' && <Field label="Franja"><input required placeholder="Ej. Durante montaje" value={flexibleTime} onChange={(e) => setFlexibleTime(e.target.value)} className={fieldClass} /></Field>}
-          <Field label="Tarea"><input required value={what} onChange={(e) => setWhat(e.target.value)} className={fieldClass} /></Field>
-          <Field label="Proveedor / contacto"><input value={meta} onChange={(e) => setMeta(e.target.value)} list="provider-options" className={fieldClass} /></Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Tarea" className="sm:col-span-2"><input required value={what} onChange={(e) => setWhat(e.target.value)} className={fieldClass} /></Field>
+          <div className="grid gap-3 border-y border-border py-4 sm:col-span-2 sm:grid-cols-3">
+            <Field label="Horario"><select value={timeMode} onChange={(e) => setTimeMode(e.target.value as 'fixed' | 'range' | 'flexible')} className={fieldClass}><option value="fixed">Hora fija</option><option value="range">Inicio y fin</option><option value="flexible">Franja libre</option></select></Field>
+            {timeMode === 'fixed' && <Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field>}
+            {timeMode === 'range' && <><Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field><Field label="Fin"><input required type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={fieldClass} /></Field></>}
+            {timeMode === 'flexible' && <Field label="Franja" className="sm:col-span-2"><input required placeholder="Ej. Durante montaje" value={flexibleTime} onChange={(e) => setFlexibleTime(e.target.value)} className={fieldClass} /></Field>}
+          </div>
+          <Field label="Proveedor / contacto" className="sm:col-span-2"><input value={meta} onChange={(e) => setMeta(e.target.value)} list="provider-options" placeholder="Buscar o escribir proveedor / contacto" className={fieldClass} /></Field>
           <Field label="Contacto externo"><input value={who} onChange={(e) => setWho(e.target.value)} className={fieldClass} /></Field>
           <Field label="Responsable Smartworks"><select value={assigned_to} onChange={(e) => setAssigned(e.target.value)} className={fieldClass}><option value="">Sin asignar</option>{members.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email}</option>)}</select></Field>
           <Field label="Énfasis"><select value={variant} onChange={(e) => setVariant(e.target.value as TaskVariant)} className={fieldClass}><option value="normal">Normal</option><option value="accent">Destacada</option><option value="quiet">Secundaria</option></select></Field>
@@ -534,14 +530,16 @@ function NewTaskModal({ lanes, members, providers, onCancel, onSubmit }: {
     <div className="fixed inset-0 z-50 flex items-end bg-black/30 p-3 sm:items-center sm:justify-center" role="dialog" aria-modal="true" aria-labelledby="new-task-title">
       <form onSubmit={submit} className="w-full max-w-xl border border-border-strong bg-surface p-5 shadow-xl sm:p-6">
         <div className="mb-5 flex items-start justify-between gap-4"><div><p className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-text-faint">Administración</p><h3 id="new-task-title" className="mt-1 text-lg font-bold text-text">Nueva tarea</h3></div><button type="button" onClick={onCancel} className="h-9 px-2 font-mono text-[11px] text-text-dim underline">Cancelar</button></div>
-        <div className="grid gap-3 sm:grid-cols-[110px_1fr]">
-          <Field label="Espacio"><select required value={laneId} onChange={(e) => setLaneId(e.target.value)} className={fieldClass}>{lanes.map((lane) => <option key={lane.id} value={lane.id}>{[lane.room, lane.floor].filter(Boolean).join(' · ')}</option>)}</select></Field>
-          <Field label="Horario"><select value={timeMode} onChange={(e) => setTimeMode(e.target.value as 'fixed' | 'range' | 'flexible')} className={fieldClass}><option value="fixed">Hora fija</option><option value="range">Inicio y fin</option><option value="flexible">Franja libre</option></select></Field>
-          {timeMode === 'fixed' && <Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field>}
-          {timeMode === 'range' && <><Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field><Field label="Fin"><input required type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={fieldClass} /></Field></>}
-          {timeMode === 'flexible' && <Field label="Franja"><input required placeholder="Ej. Durante montaje" value={flexibleTime} onChange={(e) => setFlexibleTime(e.target.value)} className={fieldClass} /></Field>}
-          <Field label="Tarea"><input required value={what} onChange={(e) => setWhat(e.target.value)} className={fieldClass} /></Field>
-          <Field label="Proveedor / contacto"><input value={meta} onChange={(e) => setMeta(e.target.value)} list="provider-options-new" className={fieldClass} /></Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Tarea" className="sm:col-span-2"><input required value={what} onChange={(e) => setWhat(e.target.value)} className={fieldClass} /></Field>
+          <Field label="Espacio" className="sm:col-span-2"><select required value={laneId} onChange={(e) => setLaneId(e.target.value)} className={fieldClass}>{lanes.map((lane) => <option key={lane.id} value={lane.id}>{[lane.room, lane.floor].filter(Boolean).join(' · ')}</option>)}</select></Field>
+          <div className="grid gap-3 border-y border-border py-4 sm:col-span-2 sm:grid-cols-3">
+            <Field label="Horario"><select value={timeMode} onChange={(e) => setTimeMode(e.target.value as 'fixed' | 'range' | 'flexible')} className={fieldClass}><option value="fixed">Hora fija</option><option value="range">Inicio y fin</option><option value="flexible">Franja libre</option></select></Field>
+            {timeMode === 'fixed' && <Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field>}
+            {timeMode === 'range' && <><Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field><Field label="Fin"><input required type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={fieldClass} /></Field></>}
+            {timeMode === 'flexible' && <Field label="Franja" className="sm:col-span-2"><input required placeholder="Ej. Durante montaje" value={flexibleTime} onChange={(e) => setFlexibleTime(e.target.value)} className={fieldClass} /></Field>}
+          </div>
+          <Field label="Proveedor / contacto" className="sm:col-span-2"><input value={meta} onChange={(e) => setMeta(e.target.value)} list="provider-options-new" placeholder="Buscar o escribir proveedor / contacto" className={fieldClass} /></Field>
           <Field label="Contacto externo"><input value={who} onChange={(e) => setWho(e.target.value)} className={fieldClass} /></Field>
           <Field label="Responsable Smartworks"><select value={assigned_to} onChange={(e) => setAssigned(e.target.value)} className={fieldClass}><option value="">Sin asignar</option>{members.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email}</option>)}</select></Field>
           <Field label="Énfasis"><select value={variant} onChange={(e) => setVariant(e.target.value as TaskVariant)} className={fieldClass}><option value="normal">Normal</option><option value="accent">Destacada</option><option value="quiet">Secundaria</option></select></Field>
@@ -554,8 +552,8 @@ function NewTaskModal({ lanes, members, providers, onCancel, onSubmit }: {
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="flex flex-col gap-1.5"><span className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-text-faint">{label}</span>{children}</label>
+function Field({ label, children, className = '' }: { label: string; children: React.ReactNode; className?: string }) {
+  return <label className={`flex flex-col gap-1.5 ${className}`}><span className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-text-faint">{label}</span>{children}</label>
 }
 
 function readTiming(value: string | null) {

@@ -6,16 +6,17 @@ interface Props {
   contained?: boolean
   canCheck: boolean
   assigneeName: string | null
+  isMine?: boolean
   onToggle: (task: DbTask, next: boolean) => void
 }
 
-export function TaskRow({ task, showTime = true, contained = false, canCheck, assigneeName, onToggle }: Props) {
+export function TaskRow({ task, showTime = true, contained = false, canCheck, assigneeName, isMine = false, onToggle }: Props) {
   const isAccent = task.variant === 'accent'
   const isQuiet = task.variant === 'quiet'
 
   return (
     <label
-      className={`flex items-start gap-3 ${contained ? '' : 'border-b border-border py-2.5 last:border-b-0'} ${canCheck ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
+      className={`flex items-start gap-3 ${contained ? '' : 'border-b border-border py-2.5 last:border-b-0'} ${isMine ? '-mx-1.5 rounded-sm bg-yellow/45 px-1.5 py-1' : ''} ${canCheck ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
       title={canCheck ? undefined : 'Solo el responsable asignado o un admin puede marcar esta tarea'}
     >
       <input
