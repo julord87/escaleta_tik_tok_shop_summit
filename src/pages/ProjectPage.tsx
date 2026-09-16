@@ -168,9 +168,9 @@ export function ProjectPage() {
             {isAdmin && <div className="mt-3"><button type="button" onClick={() => setShowStructure((value) => !value)} className="font-mono text-[10.5px] text-text-faint underline">{showStructure ? 'Volver a orden cronológico' : 'Editar estructura por sala'}</button></div>}
 
             {!showStructure && <div className="mt-4 divide-y divide-border border-t-2 border-text">
-              {orderedTasks.map(({ lane, task }) => <div key={task.id} className={`grid gap-2 py-3 sm:grid-cols-[110px_150px_minmax(0,1fr)] ${task.variant === 'accent' ? 'bg-yellow px-3' : ''}`}>
+              {orderedTasks.map(({ lane, task }) => <div key={task.id} className={`grid gap-2 py-3 sm:grid-cols-[110px_150px_minmax(0,1fr)] ${task.variant === 'accent' ? 'border-l-[3px] border-text pl-3' : ''}`}>
                 <span className="font-mono text-[11px] font-semibold text-text">{task.time_label}</span>
-                <span className="font-mono text-[10px] uppercase tracking-wide text-text-faint">{lane.room}<br />{lane.floor}</span>
+                <span className="border-l-2 border-border-strong pl-2 font-mono text-[10px] font-bold uppercase leading-relaxed tracking-wide text-text">{lane.room}<br /><span className="font-normal text-text-faint">{lane.floor}</span></span>
                 <div className="flex items-start gap-2"><div className="flex-1"><TaskRow task={task} showTime={false} canCheck={canCheckTask(task)} assigneeName={profileLabel(profileById(task.assigned_to))} onToggle={requestToggleTask} /></div>{isAdmin && <DeleteButton itemLabel={task.what} confirmText="Eliminar tarea (se puede restaurar desde la papelera)" onConfirm={() => deleteTask(task.id)} className="mt-2" />}</div>
               </div>)}
             </div>}

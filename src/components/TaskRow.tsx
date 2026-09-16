@@ -15,7 +15,7 @@ export function TaskRow({ task, showTime = true, canCheck, assigneeName, onToggl
   return (
     <label
       className={`flex items-start gap-3 border-b border-border py-2.5 last:border-b-0 ${
-        isAccent ? 'bg-surface-2 border-l-[3px] border-l-text pl-3' : ''
+        isAccent ? 'border-l-[3px] border-l-text pl-3' : ''
       } ${canCheck ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
       title={canCheck ? undefined : 'Solo el responsable asignado o un admin puede marcar esta tarea'}
     >
@@ -30,7 +30,7 @@ export function TaskRow({ task, showTime = true, canCheck, assigneeName, onToggl
         {task.time_label}
       </span>}
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className={`text-[13px] leading-snug ${task.checked ? 'text-text-faint line-through' : isQuiet ? 'text-text-dim' : 'text-text'}`}>
+        <span className={`text-[13px] leading-snug ${task.checked ? 'text-text-faint line-through' : isQuiet ? 'text-text-dim' : isAccent ? 'font-semibold text-text' : 'text-text'}`}>
           {task.what}
         </span>
         <span className="flex flex-wrap items-center gap-x-2 font-mono text-[10px] tracking-wide text-text-faint">
