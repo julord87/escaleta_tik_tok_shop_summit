@@ -24,7 +24,7 @@ export function ProjectPage() {
   const {
     project, members, myRole, days, openItems, crew, contacts, trashedTasks, loading,
     toggleTask, toggleOpenItem,
-    addDay, deleteDay, addLane, deleteLane, addTask, deleteTask, restoreTask,
+    addDay, deleteDay, addLane, updateLane, deleteLane, addTask, deleteTask, restoreTask,
     updateTask,
     addOpenItem, deleteOpenItem, addCrewPanel, deleteCrewPanel, addContact, deleteContact,
     addMemberByEmail, updateMemberRole, removeMember,
@@ -40,6 +40,7 @@ export function ProjectPage() {
   const [showAddDay, setShowAddDay] = useState(false)
   const [showStructure, setShowStructure] = useState(false)
   const [editingTask, setEditingTask] = useState<DbTask | null>(null)
+  const [editingLane, setEditingLane] = useState<{ id: string; room: string | null; floor: string | null } | null>(null)
   const [creatingTask, setCreatingTask] = useState(false)
 
   const selectedDay = useMemo(
@@ -198,7 +199,10 @@ export function ProjectPage() {
                       <span className="text-[13.5px] font-semibold text-text">{lane.room}</span>
                       <span className="font-mono text-[10px] uppercase tracking-wide text-text-faint">{lane.floor}</span>
                       {isAdmin && (
-                        <DeleteButton itemLabel={`Eliminar la sala "${lane.room}" y sus tareas`} onConfirm={() => deleteLane(lane.id)} className="self-start" />
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => setEditingLane(lane)} className="font-mono text-[10.5px] text-text-dim underline">editar sala</button>
+                          <DeleteButton itemLabel={`Eliminar la sala "${lane.room}" y sus tareas`} onConfirm={() => deleteLane(lane.id)} className="self-start" />
+                        </div>
                       )}
                     </div>
                     <div className="flex flex-1 flex-col">
@@ -302,7 +306,8 @@ export function ProjectPage() {
         onConfirm={confirmPending}
         onCancel={() => setPending(null)}
       />
-      {editingTask && <EditTaskModal task={editingTask} members={members} providers={providerOptions} onCancel={() => setEditingTask(null)} onSubmit={async (values) => { await updateTask(editingTask.id, values); setEditingTask(null) }} />}
+      {editingTask && selectedDay && <EditTaskModal task={editingTask} lanes={selectedDay.lanes} members={members} providers={providerOptions} onCancel={() => setEditingTask(null)} onSubmit={async (values) => { await updateTask(editingTask.id, values); setEditingTask(null) }} />}
+      {editingLane && <EditLaneModal lane={editingLane} onCancel={() => setEditingLane(null)} onSubmit={async (values) => { await updateLane(editingLane.id, values); setEditingLane(null) }} />}
       {creatingTask && selectedDay && <NewTaskModal lanes={selectedDay.lanes} members={members} providers={providerOptions} onCancel={() => setCreatingTask(false)} onSubmit={async (laneId, values) => { await addTask(laneId, values); setCreatingTask(false) }} />}
     </div>
   )
@@ -436,12 +441,13 @@ function EditTaskButton({ onClick }: { onClick: () => void }) {
   )
 }
 
-function EditTaskModal({ task, members, providers, onCancel, onSubmit }: {
+function EditTaskModal({ task, lanes, members, providers, onCancel, onSubmit }: {
   task: DbTask
+  lanes: { id: string; room: string | null; floor: string | null }[]
   members: { user_id: string; profile?: { full_name: string | null; email: string | null } }[]
   providers: string[]
   onCancel: () => void
-  onSubmit: (v: Pick<DbTask, 'time_label' | 'what' | 'meta' | 'who' | 'note' | 'variant' | 'assigned_to'>) => Promise<void>
+  onSubmit: (v: Pick<DbTask, 'lane_id' | 'time_label' | 'what' | 'meta' | 'who' | 'note' | 'variant' | 'assigned_to'>) => Promise<void>
 }) {
   const initialTiming = readTiming(task.time_label)
   const [timeMode, setTimeMode] = useState<'fixed' | 'range' | 'flexible'>(initialTiming.mode)
@@ -449,6 +455,7 @@ function EditTaskModal({ task, members, providers, onCancel, onSubmit }: {
   const [endTime, setEndTime] = useState(initialTiming.end)
   const [flexibleTime, setFlexibleTime] = useState(initialTiming.flexible)
   const [what, setWhat] = useState(task.what)
+  const [laneId, setLaneId] = useState(task.lane_id)
   const [meta, setMeta] = useState(task.meta ?? '')
   const [who, setWho] = useState(task.who ?? '')
   const [note, setNote] = useState(task.note ?? '')
@@ -461,7 +468,7 @@ function EditTaskModal({ task, members, providers, onCancel, onSubmit }: {
     event.preventDefault()
     setSaving(true)
     const time_label = timeMode === 'range' ? `${startTime}–${endTime}` : timeMode === 'fixed' ? startTime : flexibleTime
-    await onSubmit({ time_label, what, meta, who, note, variant, assigned_to: assigned_to || null })
+    await onSubmit({ lane_id: laneId, time_label, what, meta, who, note, variant, assigned_to: assigned_to || null })
   }
 
   return (
@@ -476,6 +483,7 @@ function EditTaskModal({ task, members, providers, onCancel, onSubmit }: {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Tarea" className="sm:col-span-2"><input required value={what} onChange={(e) => setWhat(e.target.value)} className={fieldClass} /></Field>
+          <Field label="Espacio" className="sm:col-span-2"><select required value={laneId} onChange={(e) => setLaneId(e.target.value)} className={fieldClass}>{lanes.map((lane) => <option key={lane.id} value={lane.id}>{[lane.room, lane.floor].filter(Boolean).join(' · ')}</option>)}</select></Field>
           <div className="grid gap-3 border-y border-border py-4 sm:col-span-2 sm:grid-cols-3">
             <Field label="Horario"><select value={timeMode} onChange={(e) => setTimeMode(e.target.value as 'fixed' | 'range' | 'flexible')} className={fieldClass}><option value="fixed">Hora fija</option><option value="range">Inicio y fin</option><option value="flexible">Franja libre</option></select></Field>
             {timeMode === 'fixed' && <Field label="Inicio"><input required type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={fieldClass} /></Field>}
@@ -489,6 +497,35 @@ function EditTaskModal({ task, members, providers, onCancel, onSubmit }: {
           <div className="sm:col-span-2"><Field label="Notas"><textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} className={`${fieldClass} resize-y`} /></Field></div>
         </div>
         <datalist id="provider-options">{providers.map((provider) => <option key={provider} value={provider} />)}</datalist>
+        <div className="mt-6 flex justify-end gap-2 border-t border-border pt-4">
+          <button type="button" onClick={onCancel} className="rounded-md px-3 py-2 font-mono text-[11px] text-text-dim">Cancelar</button>
+          <button disabled={saving} type="submit" className="rounded-md bg-text px-4 py-2 font-mono text-[11px] font-semibold text-white disabled:opacity-60">{saving ? 'Guardando…' : 'Guardar cambios'}</button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+function EditLaneModal({ lane, onCancel, onSubmit }: {
+  lane: { id: string; room: string | null; floor: string | null }
+  onCancel: () => void
+  onSubmit: (v: { room: string; floor: string }) => Promise<void>
+}) {
+  const [room, setRoom] = useState(lane.room ?? '')
+  const [floor, setFloor] = useState(lane.floor ?? '')
+  const [saving, setSaving] = useState(false)
+  const fieldClass = 'w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-[13px] text-text outline-none transition-colors duration-150 focus:border-text focus:ring-2 focus:ring-text/15'
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-black/30 p-3 sm:items-center sm:justify-center" role="dialog" aria-modal="true" aria-labelledby="edit-lane-title">
+      <form onSubmit={async (event) => { event.preventDefault(); setSaving(true); await onSubmit({ room, floor }) }} className="w-full max-w-md border border-border-strong bg-surface p-5 shadow-xl sm:p-6">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div><p className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-text-faint">Administración</p><h3 id="edit-lane-title" className="mt-1 text-lg font-bold text-text">Editar sala</h3></div>
+          <button type="button" onClick={onCancel} className="h-9 px-2 font-mono text-[11px] text-text-dim underline">Cancelar</button>
+        </div>
+        <div className="grid gap-4">
+          <Field label="Sala"><input required value={room} onChange={(event) => setRoom(event.target.value)} className={fieldClass} /></Field>
+          <Field label="Planta / detalle"><input value={floor} onChange={(event) => setFloor(event.target.value)} className={fieldClass} /></Field>
+        </div>
         <div className="mt-6 flex justify-end gap-2 border-t border-border pt-4">
           <button type="button" onClick={onCancel} className="rounded-md px-3 py-2 font-mono text-[11px] text-text-dim">Cancelar</button>
           <button disabled={saving} type="submit" className="rounded-md bg-text px-4 py-2 font-mono text-[11px] font-semibold text-white disabled:opacity-60">{saving ? 'Guardando…' : 'Guardar cambios'}</button>

@@ -135,6 +135,10 @@ export function useProjectData(projectId: string | undefined) {
     await supabase.from('lanes').insert({ day_id: dayId, sort_order: day?.lanes.length ?? 0, ...input })
     await reload()
   }
+  async function updateLane(id: string, input: { room: string; floor: string }) {
+    await supabase.from('lanes').update(input).eq('id', id)
+    await reload()
+  }
   async function deleteLane(id: string) {
     await supabase.from('lanes').delete().eq('id', id)
     await reload()
@@ -146,7 +150,7 @@ export function useProjectData(projectId: string | undefined) {
     await supabase.from('tasks').insert({ lane_id: laneId, ...input })
     await reload()
   }
-  async function updateTask(id: string, input: Partial<Pick<DbTask, 'time_label' | 'what' | 'meta' | 'who' | 'note' | 'variant' | 'assigned_to'>>) {
+  async function updateTask(id: string, input: Partial<Pick<DbTask, 'lane_id' | 'time_label' | 'what' | 'meta' | 'who' | 'note' | 'variant' | 'assigned_to'>>) {
     await supabase.from('tasks').update(input).eq('id', id)
     await reload()
   }
@@ -236,6 +240,7 @@ export function useProjectData(projectId: string | undefined) {
     addDay,
     deleteDay,
     addLane,
+    updateLane,
     deleteLane,
     addTask,
     updateTask,
